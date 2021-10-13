@@ -1,14 +1,16 @@
-from flask import Flask
+from flask import Flask,request, Response, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import datetime
-
 from config import postgresqlConfig
 import csv
+import hashlib
+
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = postgresqlConfig
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 
 db = SQLAlchemy(app)
 
@@ -35,6 +37,13 @@ class App(db.Model):
         db.session.add(new_app)
         db.session.commit()
 
+    @staticmethod
+    def json(self):
+        return {'id': self.id, 'name': self.name,
+                'icon': self.icon, 'created_at': self.created_at , 'updated_at': self.updated_at}
+
+
+
 class Screenshot(db.Model):
     __tablename__ = 'screenshots'
     id = db.Column(db.Integer, primary_key=True)
@@ -54,11 +63,71 @@ class Screenshot(db.Model):
         self.updated_at = updated_at
 
     @staticmethod
+    def json(self):
+        return {'id': self.id, 'app_id': self.app_id,
+                'app': App.json(self.app), 'file_name': self.file_name, 'created_at': self.created_at, 'updated_at': self.updated_at}
+
+
+    @staticmethod
     def add_screenshot(_id, _app_id, _file_name, _created_at, _updated_at):
         new_ss = Screenshot(id=_id, app_id=_app_id, file_name=_file_name, created_at=_created_at, updated_at=_updated_at)
         db.session.add(new_ss)
         db.session.commit()
 
+    @staticmethod
+    def get_all_ss():
+        return [Screenshot.json(ss) for ss in Screenshot.query.all()]
+
+    @staticmethod
+    def get_ss_id(_id):
+        return [Screenshot.json(Screenshot.query.filter_by(id=_id).first())]
+
+def sethash(s):
+    return str(int(hashlib.sha256(s.encode('utf-8')).hexdigest(), 16) % 10**8)
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, db.Identity(start=1, increment=1, cycle=True), primary_key=True)
+    username = db.Column(db.VARCHAR)
+    password = db.Column(db.VARCHAR)
+
+    @staticmethod
+    def json(self):
+        if self is None:
+            return None
+        return {'name': self.username,
+                'password': self.password}
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+    @staticmethod
+    def add_user(_username, _password):
+        new_user = User(username=_username, password=_password)
+        db.session.add(new_user)
+        db.session.commit()
+
+    @staticmethod
+    def login(username, password):
+        user = User.json(User.query.filter_by(username=username).first())
+        if user is None:
+            return {
+                    'success': False,
+                    'msg': "User not found"
+                }
+        else:
+            hashedPwd = sethash(password)
+            if hashedPwd == user["password"]:
+                return {
+                    'success': True,
+                    'msg': "Successful"
+                }
+            return {
+                    'success': False,
+                    'msg': "Wrong Password"
+                }
 
 def create_database():
     db.create_all()
@@ -66,6 +135,7 @@ def create_database():
 
 create_database()
 
+User.add_user("appz", sethash("`123456&*"))
 
 def read_app_file(filename):
     with open("{}".format(filename)) as csv_file:
@@ -74,7 +144,6 @@ def read_app_file(filename):
         isAppFile = True
         for row in csv_reader:
             if line_count == 0:
-                print(row)
                 if 'app_id' in row:
                     isAppFile = False
                 line_count += 1
@@ -82,13 +151,43 @@ def read_app_file(filename):
                 if isAppFile:
                     App.add_app(row[0], row[1], row[2], row[3], row[4])
                 else:
-                    Screenshot.add_screenshot(row[0],row[1], row[2], row[3], row[4])
+                    Screenshot.add_screenshot(row[0], row[1], row[2], row[3], row[4])
                 line_count += 1
 
 
 read_app_file("static/sample_apps.csv")
 
 read_app_file("static/sample_screeshots.csv")
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    if request.method == "POST":
+        data = request.get_json(force=True)
+        verified = User.login(data["username"], data["password"])
+        return jsonify(verified)
+
+
+@app.route('/api/apps', methods=['GET'])
+def get_all_apps():
+    return {
+        'data': [App.json(app) for app in App.query.all()],
+    }
+
+@app.route('/api/apps/<id>', methods=['GET'])
+def get_app_by_id(id):
+    return {
+        'data': App.json(App.query.filter_by(id=id).first())
+    }
+
+
+@app.route('/api/screenshots', methods=['GET'])
+def screenshots():
+    if request.method == "GET":
+        return {
+            'data': Screenshot.get_all_ss(),
+        }
+
 
 
 if __name__ == '__main__':

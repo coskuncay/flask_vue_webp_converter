@@ -8,9 +8,9 @@
 - [x] Read CSV file
   - [x] Add into DB
   - [x] updated_at fields set to today date and time (optional)
-- [ ] Create User Model (optional)
+- [x] Create User Model (optional)
   - [ ] JWT Token (optional)
-- [ ] Get Apps and Screenshots(include app) Methods
+- [x] Get Apps and Screenshots(include app) Methods
 - [ ] Design UI
   - [ ] Design App&Screenshots Page with Vue.JS ,Bootstrap and PrimeVue
   - [ ] Design Webp Converter Page 
