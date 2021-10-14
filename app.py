@@ -4,9 +4,13 @@ import datetime
 from config import postgresqlConfig
 import csv
 import hashlib
+from flask_cors import CORS
+from PIL import Image
+import io
 
 
 app = Flask(__name__)
+CORS(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = postgresqlConfig
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -105,9 +109,20 @@ class User(db.Model):
 
     @staticmethod
     def add_user(_username, _password):
+        user = User.json(User.query.filter_by(username=_username).first())
+        if user is not None:
+            return {
+                'success': False,
+                'msg': "Username is taken"
+            }
+
         new_user = User(username=_username, password=_password)
         db.session.add(new_user)
         db.session.commit()
+        return {
+            'success': True,
+            'msg': "Successfully Registered"
+        }
 
     @staticmethod
     def login(username, password):
@@ -136,6 +151,7 @@ def create_database():
 create_database()
 
 User.add_user("appz", sethash("`123456&*"))
+User.add_user("1", sethash("1"))
 
 def read_app_file(filename):
     with open("{}".format(filename)) as csv_file:
@@ -166,6 +182,24 @@ def login():
         data = request.get_json(force=True)
         verified = User.login(data["username"], data["password"])
         return jsonify(verified)
+
+
+@app.route('/register', methods=['POST'])
+def register():
+    if request.method == "POST":
+        data = request.get_json(force=True)
+        verified = User.add_user(data["username"], sethash(data["password"]))
+        return jsonify(verified)
+
+
+@app.route('/convert', methods=['POST'])
+def convert():
+    if request.method == "POST":
+        image_data = request.get_data()
+        image = Image.frombytes('RGBA', (128,128), image_data, 'raw')
+        image.show()
+        return jsonify(True)
+
 
 
 @app.route('/api/apps', methods=['GET'])
