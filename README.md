@@ -1,5 +1,7 @@
 # AppsProject
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/4cd42864-0222-485a-9d5a-589ab84b37db/deploy-status)](https://app.netlify.com/sites/apps-project/deploys)
+
 You need to create server in PostgreSQL same name with POSTGRES_DB
 
 ```console
