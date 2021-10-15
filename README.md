@@ -1,5 +1,10 @@
 # AppsProject
 
+You need to create server in PostgreSQL same name with POSTGRES_DB
+
+```console
+docker-compose up -d 
+```
 
 - [x] Connect to local relational DB (PostgreSQL)  
   - [x] Connect to dockerize DB with host name in same network
