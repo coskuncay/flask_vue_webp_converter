@@ -2,7 +2,7 @@
 
 
 - [x] Connect to local relational DB (PostgreSQL)  
-  - [ ] Connect to dockerize DB with host name in same network
+  - [x] Connect to dockerize DB with host name in same network
 - [x] Create Models and Table in DB
   - [x] Set foreign key apps_id to id in App Table
 - [x] Read CSV file
@@ -17,5 +17,4 @@
 	- [x] Use Vuex , state management (login auth) 
   - [x] Design Webp Converter Page 
     - [x] Create Client-Side method
-- [ ] Generate Dockerfile and set dependencies
-- [ ] Generate .yaml files (optional)
+- [x] Generate Dockerfile and set dependencies

@@ -94,13 +94,6 @@ export default {
     watch: {
         selectedApp(newVal, oldVal) {
             console.log("🚀 ~ file: GameCompare.vue ~ line 94 ~ selectedApp ~ newVal, oldVal", newVal, oldVal)
-            if (oldVal) {
-                if (newVal.id == oldVal.id) {
-                    Swal.fire({
-                        title: "Please select different app :)",
-                    })
-                }
-            }
             this.otherApps = this.apps.filter(g => g.id != this.selectedApp.id)
             this.otherSelectedApp = null
         }

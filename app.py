@@ -150,8 +150,14 @@ def create_database():
 
 create_database()
 
-User.add_user("appz", sethash("`123456&*"))
-User.add_user("1", sethash("1"))
+
+
+
+def db_is_free():
+    user = User.json(User.query.filter_by(username="appz").first())
+    if user is None:
+        return True
+    return False
 
 def read_app_file(filename):
     with open("{}".format(filename)) as csv_file:
@@ -171,10 +177,13 @@ def read_app_file(filename):
                 line_count += 1
 
 
-read_app_file("static/sample_apps.csv")
+if(db_is_free()):
+    read_app_file("static/sample_apps.csv")
+    read_app_file("static/sample_screeshots.csv")
 
-read_app_file("static/sample_screeshots.csv")
 
+User.add_user("appz", sethash("`123456&*"))
+User.add_user("1", sethash("1"))
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -182,6 +191,7 @@ def login():
         data = request.get_json(force=True)
         verified = User.login(data["username"], data["password"])
         return jsonify(verified)
+
 
 
 @app.route('/register', methods=['POST'])
@@ -225,4 +235,4 @@ def screenshots():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000, debug=True)

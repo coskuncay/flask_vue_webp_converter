@@ -13,7 +13,8 @@
     <div class="p-field p-grid mt-3">
         <label class="p-col-fixed" style="width:100px">Password</label>
         <div class="p-col">
-            <InputText v-model="password" type="password" />
+            <InputText v-model="password" :type="showPwd ? 'text' : 'password' " />
+            <i :class="showPwd ? 'pi pi-eye-slash' : 'pi pi-eye'" style="margin-left: -25px;cursor: pointer;" @click="showPassword()" />
         </div>
     </div>
     <div class="p-field p-grid mt-3">
@@ -21,7 +22,7 @@
         <div v-else>
             <label class="p-col-fixed" style="width:100px">Re-Password</label>
             <div class="p-col">
-                <InputText v-model="rePassword" type="password" />
+                <InputText v-model="rePassword" :type="showPwd ? 'text' : 'password' " />
             </div>
         </div>
     </div>
@@ -46,9 +47,13 @@ export default {
             password: "",
             rePassword: "",
             isLoginState: true,
+            showPwd: false,
         }
     },
     methods: {
+        showPassword() {
+            this.showPwd = !this.showPwd
+        },
         backClick() {
             this.isLoginState = true
         },

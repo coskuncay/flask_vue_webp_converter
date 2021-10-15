@@ -1,0 +1,73 @@
+version: '3.5'
+
+services:
+  frontend:
+    container_name: nginx_container
+    image: nginx
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+       - ./apps_web\dist:/usr/share/nginx/html:ro
+       - ./apps_web\nginx\conf.d:/etc/nginx/conf.d
+    networks:
+      - postgres
+    depends_on:
+      - postgres 
+      - app
+      
+  app:
+    container_name: flask_container
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: flask_app
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
+    ports:
+      - 5000:5000
+    networks:
+      - postgres
+    depends_on:
+      - postgres  
+      
+  postgres:
+    container_name: postgres_container
+    image: postgres:latest
+    env_file: docker/database.conf
+    volumes:
+       - postgres:/data/postgres
+    ports:
+      - 5432:5432
+    networks:
+      - postgres
+    restart: always
+  
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+       - pgadmin:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - postgres
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+    postgres:
+    pgadmin:
