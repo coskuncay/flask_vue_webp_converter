@@ -10,6 +10,7 @@ docker-compose up -d
 
 - [x] Connect to local relational DB (PostgreSQL)  
   - [x] Connect to dockerize DB with host name in same network
+  - [x] Create DB init script
 - [x] Create Models and Table in DB
   - [x] Set foreign key apps_id to id in App Table
 - [x] Read CSV file
@@ -25,3 +26,5 @@ docker-compose up -d
   - [x] Design Webp Converter Page 
     - [x] Create Client-Side method
 - [x] Generate Dockerfile and set dependencies
+- [x] Generate Kubernetes yaml files (optional)
+- [x] Serve on netlify (optional)
